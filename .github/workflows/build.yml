@@ -1,0 +1,45 @@
+cat > .github/workflows/build.yml << 'EOF'
+name: Build Electron App
+
+on:
+  push:
+    branches: [ main, master ]
+  workflow_dispatch:
+
+jobs:
+  build-windows:
+    runs-on: windows-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    - uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+    - uses: actions/setup-python@v5
+      with:
+        python-version: '3.11'
+    
+    - name: Install Python deps
+      run: |
+        cd backend
+        pip install -r requirements.txt
+
+    - name: Download FFmpeg
+      run: |
+        Invoke-WebRequest -Uri "https://github.com/BtbN/FFmpeg-Builds/releases/download/latest/ffmpeg-master-latest-win64-gpl.zip" -OutFile "ffmpeg.zip"
+        Expand-Archive -Path "ffmpeg.zip" -DestinationPath "ffmpeg-temp"
+        New-Item -ItemType Directory -Force -Path "electron/ffmpeg"
+        Copy-Item "ffmpeg-temp/ffmpeg-master-latest-win64-gpl/bin/ffmpeg.exe" -Destination "electron/ffmpeg/"
+      shell: powershell
+
+    - name: Build
+      run: |
+        cd electron
+        npm install
+        npm run build:win
+
+    - uses: actions/upload-artifact@v4
+      with:
+        name: vk-media-dump-windows
+        path: electron/dist/*.exe
+EOF
