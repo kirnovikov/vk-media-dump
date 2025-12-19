@@ -11,9 +11,11 @@ jobs:
     
     steps:
     - uses: actions/checkout@v4
+    
     - uses: actions/setup-node@v4
       with:
         node-version: '20'
+    
     - uses: actions/setup-python@v5
       with:
         python-version: '3.11'
@@ -31,14 +33,16 @@ jobs:
         Copy-Item "ffmpeg-temp/ffmpeg-master-latest-win64-gpl/bin/ffmpeg.exe" -Destination "electron/ffmpeg/"
       shell: powershell
 
-    - name: Build
+    - name: Build Electron App
       run: |
         cd electron
         npm install
         npm run build:win
+      env:
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
     - uses: actions/upload-artifact@v4
       with:
         name: vk-media-dump-windows
         path: electron/dist/*.exe
-EOF
+        retention-days: 30
