@@ -5,12 +5,11 @@
   "main": "main.js",
   "scripts": {
     "start": "electron .",
-    "build:win": "electron-builder --win",
-    "build:mac": "electron-builder --mac"
+    "build:win": "electron-builder --win"
   },
   "repository": {
-  "type": "git",
-  "url": "https://github.com/kirnovikov/vk-media-dump.git"
+    "type": "git",
+    "url": "https://github.com/kirnovikov/vk-media-dump.git"
   },
   "build": {
     "appId": "com.vkmedia.dump",
@@ -31,6 +30,10 @@
         "to": "extension"
       },
       {
+        "from": "python",
+        "to": "python"
+      },
+      {
         "from": "ffmpeg",
         "to": "ffmpeg"
       }
@@ -42,7 +45,9 @@
     "nsis": {
       "oneClick": false,
       "allowToChangeInstallationDirectory": true,
-      "createDesktopShortcut": true
+      "createDesktopShortcut": true,
+      "installerIcon": "icon.png",
+      "uninstallerIcon": "icon.png"
     }
   },
   "dependencies": {},
