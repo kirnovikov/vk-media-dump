@@ -33,6 +33,11 @@ jobs:
         Copy-Item "ffmpeg-temp/ffmpeg-master-latest-win64-gpl/bin/ffmpeg.exe" -Destination "electron/ffmpeg/"
       shell: powershell
 
+    - name: Create extension ZIP
+      run: |
+        Compress-Archive -Path extension/* -DestinationPath extension.zip
+      shell: powershell
+
     - name: Build Electron App
       run: |
         cd electron
@@ -44,5 +49,7 @@ jobs:
     - uses: actions/upload-artifact@v4
       with:
         name: vk-media-dump-windows
-        path: electron/dist/*.exe
+        path: |
+          electron/dist/*.exe
+          extension.zip
         retention-days: 30
