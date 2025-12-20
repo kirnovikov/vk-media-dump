@@ -32,18 +32,23 @@ jobs:
         Expand-Archive -Path "python-embed.zip" -DestinationPath "electron/python"
         Remove-Item python-embed.zip
         
+        # Раскомментируем import site (нужно для pip)
+        $pythonPth = Get-Content "electron/python/python311._pth"
+        $pythonPth = $pythonPth -replace "#import site", "import site"
+        Set-Content "electron/python/python311._pth" $pythonPth
+        
         # Скачиваем get-pip.py
         Invoke-WebRequest -Uri "https://bootstrap.pypa.io/get-pip.py" -OutFile "electron/python/get-pip.py"
         
         # Устанавливаем pip
         cd electron/python
-        ./python.exe get-pip.py
+        ./python.exe get-pip.py --no-warn-script-location
         
         # Устанавливаем зависимости
-        ./python.exe -m pip install fastapi uvicorn requests
+        ./python.exe -m pip install fastapi uvicorn requests --no-warn-script-location
         
         # Удаляем ненужное
-        Remove-Item get-pip.py
+        Remove-Item get-pip.py -ErrorAction SilentlyContinue
       shell: powershell
 
     - name: Download FFmpeg
