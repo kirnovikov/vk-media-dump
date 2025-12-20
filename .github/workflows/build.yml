@@ -44,11 +44,16 @@ jobs:
         cd electron/python
         ./python.exe get-pip.py --no-warn-script-location
         
-        # Устанавливаем зависимости
-        ./python.exe -m pip install fastapi uvicorn requests --no-warn-script-location
+        # Устанавливаем зависимости в правильные папки
+        ./python.exe -m pip install --target=. fastapi uvicorn requests --no-warn-script-location --upgrade
         
-        # Удаляем ненужное
+        # Удаляем ненужное для уменьшения размера
         Remove-Item get-pip.py -ErrorAction SilentlyContinue
+        Remove-Item -Recurse -Force pip* -ErrorAction SilentlyContinue
+        Remove-Item -Recurse -Force setuptools* -ErrorAction SilentlyContinue
+        Remove-Item -Recurse -Force wheel* -ErrorAction SilentlyContinue
+        Remove-Item -Recurse -Force *.dist-info -ErrorAction SilentlyContinue
+        
       shell: powershell
 
     - name: Download FFmpeg
@@ -61,18 +66,40 @@ jobs:
         Remove-Item ffmpeg.zip
       shell: powershell
 
+    - name: Verify structure
+      run: |
+        Write-Host "=== Checking Python ==="
+        Test-Path electron/python/python.exe
+        Write-Host "=== Checking FFmpeg ==="
+        Test-Path electron/ffmpeg/ffmpeg.exe
+        Write-Host "=== Checking Backend ==="
+        Test-Path backend/server.py
+        Write-Host "=== Checking Extension ==="
+        Test-Path extension/manifest.json
+      shell: powershell
+
     - name: Create extension ZIP
       run: |
         Compress-Archive -Path extension/* -DestinationPath extension.zip
       shell: powershell
 
-    - name: Build Electron App
+    - name: Install Electron dependencies
       run: |
         cd electron
         npm install
+
+    - name: Build Electron App
+      run: |
+        cd electron
         npm run build:win
       env:
         GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: List build artifacts
+      run: |
+        Write-Host "=== Build artifacts ==="
+        Get-ChildItem electron/dist -Recurse | Select-Object FullName
+      shell: powershell
 
     - uses: actions/upload-artifact@v4
       with:
@@ -81,3 +108,4 @@ jobs:
           electron/dist/*.exe
           extension.zip
         retention-days: 30
+        if-no-files-found: error
