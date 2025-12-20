@@ -32,32 +32,30 @@ function createWindow() {
 }
 
 function startServer() {
-  const isWin = process.platform === 'win32';
-  const isMac = process.platform === 'darwin';
-  
   const backendPath = getResourcePath('backend');
-  const serverScript = path.join(backendPath, 'server.py');
   const ffmpegPath = getResourcePath('ffmpeg');
+  const pythonPath = getResourcePath('python');
   
-  const pythonCmd = isWin ? 'python' : 'python3';
+  // Используем встроенный Python
+  const pythonExe = path.join(pythonPath, 'python.exe');
   
   const env = {
     ...process.env,
-    PATH: `${ffmpegPath}${path.delimiter}${process.env.PATH}`,
-    PYTHONPATH: backendPath
+    PATH: `${ffmpegPath};${pythonPath};${pythonPath}\\Scripts;${process.env.PATH}`,
+    PYTHONPATH: `${backendPath};${pythonPath};${pythonPath}\\Lib;${pythonPath}\\Lib\\site-packages`
   };
 
   console.log('Starting server...');
-  console.log('Backend path:', backendPath);
-  console.log('FFmpeg path:', ffmpegPath);
+  console.log('Python:', pythonExe);
+  console.log('Backend:', backendPath);
+  console.log('FFmpeg:', ffmpegPath);
 
   serverProcess = spawn(
-    pythonCmd,
+    pythonExe,
     ['-m', 'uvicorn', 'server:app', '--port', '8765', '--host', '127.0.0.1'],
     {
       cwd: backendPath,
-      env: env,
-      shell: true
+      env: env
     }
   );
 
@@ -81,6 +79,7 @@ function startServer() {
 app.whenReady().then(() => {
   startServer();
   
+  // Даём серверу 2 секунды на запуск, потом показываем окно
   setTimeout(() => {
     createWindow();
   }, 2000);
