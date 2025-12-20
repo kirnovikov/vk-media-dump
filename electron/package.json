@@ -38,15 +38,12 @@
       }
     ],
     "win": {
-      "target": "nsis",
-      "icon": "icon.png"
+      "target": "nsis"
     },
     "nsis": {
       "oneClick": false,
       "allowToChangeInstallationDirectory": true,
-      "createDesktopShortcut": true,
-      "installerIcon": "icon.png",
-      "uninstallerIcon": "icon.png"
+      "createDesktopShortcut": true
     }
   },
   "dependencies": {},
